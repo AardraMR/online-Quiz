@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz App (5 from Each Section)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .quiz-container {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      width: 420px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    .btn {
+      display: block;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #0056b3;
+    }
+    #next-btn {
+      margin-top: 15px;
+      background: #28a745;
+      display: none;
+    }
+    #timer {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div id="quiz-screen">
+      <div id="timer">Time Left: 15s</div>
+      <h2 id="question">Question text</h2>
+      <div id="answer-buttons"></div>
+      <button id="next-btn" class="btn">Next</button>
+    </div>
+  </div>
+
+  <script>
+    // Question Pools
+    const questionPools = {
+      technology: [
+        { question: "What does HTML stand for?", answers: [
+          { text: "Hyper Text Markup Language", correct: true },
+          { text: "High Text Markup Language", correct: false },
+          { text: "Home Tool Markup Language", correct: false },
+          { text: "Hyperlinks Text Management Language", correct: false }
+        ]},
+        { question: "Which is not a JavaScript framework?", answers: [
+          { text: "React", correct: false },
+          { text: "Vue", correct: false },
+          { text: "Django", correct: true },
+          { text: "Angular", correct: false }
+        ]},
+        { question: "Who developed C programming?", answers: [
+          { text: "Dennis Ritchie", correct: true },
+          { text: "James Gosling", correct: false },
+          { text: "Bjarne Stroustrup", correct: false },
+          { text: "Guido van Rossum", correct: false }
+        ]},
+        { question: "Which company developed the Windows OS?", answers: [
+          { text: "Microsoft", correct: true },
+          { text: "Apple", correct: false },
+          { text: "Google", correct: false },
+          { text: "IBM", correct: false }
+        ]},
+        { question: "CSS is used for?", answers: [
+          { text: "Styling web pages", correct: true },
+          { text: "Server-side scripting", correct: false },
+          { text: "Database management", correct: false },
+          { text: "Hardware design", correct: false }
+        ]}
+      ],
+      science: [
+        { question: "What is the chemical symbol for water?", answers: [
+          { text: "H2O", correct: true },
+          { text: "O2", correct: false },
+          { text: "HO2", correct: false },
+          { text: "OH", correct: false }
+        ]},
+        { question: "Which planet is known as the Red Planet?", answers: [
+          { text: "Venus", correct: false },
+          { text: "Mars", correct: true },
+          { text: "Jupiter", correct: false },
+          { text: "Saturn", correct: false }
+        ]},
+        { question: "What is the speed of light?", answers: [
+          { text: "3 × 10^8 m/s", correct: true },
+          { text: "1.5 × 10^8 m/s", correct: false },
+          { text: "3 × 10^6 m/s", correct: false },
+          { text: "3 × 10^5 km/s", correct: false }
+        ]},
+        { question: "Which gas is essential for breathing?", answers: [
+          { text: "Oxygen", correct: true },
+          { text: "Nitrogen", correct: false },
+          { text: "Carbon Dioxide", correct: false },
+          { text: "Helium", correct: false }
+        ]},
+        { question: "What is the powerhouse of the cell?", answers: [
+          { text: "Mitochondria", correct: true },
+          { text: "Nucleus", correct: false },
+          { text: "Ribosome", correct: false },
+          { text: "Chloroplast", correct: false }
+        ]}
+      ],
+      general: [
+        { question: "Who wrote 'Hamlet'?", answers: [
+          { text: "William Shakespeare", correct: true },
+          { text: "Leo Tolstoy", correct: false },
+          { text: "Charles Dickens", correct: false },
+          { text: "Mark Twain", correct: false }
+        ]},
+        { question: "What is the capital of France?", answers: [
+          { text: "Paris", correct: true },
+          { text: "London", correct: false },
+          { text: "Berlin", correct: false },
+          { text: "Madrid", correct: false }
+        ]},
+        { question: "How many continents are there?", answers: [
+          { text: "7", correct: true },
+          { text: "5", correct: false },
+          { text: "6", correct: false },
+          { text: "8", correct: false }
+        ]},
+        { question: "Which is the largest ocean?", answers: [
+          { text: "Pacific Ocean", correct: true },
+          { text: "Atlantic Ocean", correct: false },
+          { text: "Indian Ocean", correct: false },
+          { text: "Arctic Ocean", correct: false }
+        ]},
+        { question: "Who invented the telephone?", answers: [
+          { text: "Alexander Graham Bell", correct: true },
+          { text: "Thomas Edison", correct: false },
+          { text: "Nikola Tesla", correct: false },
+          { text: "James Watt", correct: false }
+        ]}
+      ],
+      social: [
+        { question: "Who is known as the Father of the Nation in India?", answers: [
+          { text: "Mahatma Gandhi", correct: true },
+          { text: "Subhas Chandra Bose", correct: false },
+          { text: "Jawaharlal Nehru", correct: false },
+          { text: "Sardar Patel", correct: false }
+        ]},
+        { question: "United Nations was founded in which year?", answers: [
+          { text: "1945", correct: true },
+          { text: "1919", correct: false },
+          { text: "1939", correct: false },
+          { text: "1950", correct: false }
+        ]},
+        { question: "What is the currency of Japan?", answers: [
+          { text: "Yen", correct: true },
+          { text: "Won", correct: false },
+          { text: "Peso", correct: false },
+          { text: "Dollar", correct: false }
+        ]},
+        { question: "Who was the first President of the USA?", answers: [
+          { text: "George Washington", correct: true },
+          { text: "Abraham Lincoln", correct: false },
+          { text: "John Adams", correct: false },
+          { text: "Thomas Jefferson", correct: false }
+        ]},
+        { question: "Which is the largest democracy in the world?", answers: [
+          { text: "India", correct: true },
+          { text: "USA", correct: false },
+          { text: "UK", correct: false },
+          { text: "China", correct: false }
+        ]}
+      ]
+    };
+
+    const questionElement = document.getElementById("question");
+    const answerButtons = document.getElementById("answer-buttons");
+    const nextButton = document.getElementById("next-btn");
+    const timerElement = document.getElementById("timer");
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let timeLeft = 15;
+    let timer;
+    let selectedQuestions = [];
+
+    // Shuffle array
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    // Select 5 random from each section
+    function prepareQuiz() {
+      selectedQuestions = [];
+      for (let section in questionPools) {
+        let questions = shuffleArray([...questionPools[section]]).slice(0, 5);
+        selectedQuestions = selectedQuestions.concat(questions);
+      }
+      selectedQuestions = shuffleArray(selectedQuestions); // mix all together
+    }
+
+    function startQuiz() {
+      prepareQuiz();
+      currentQuestionIndex = 0;
+      score = 0;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      resetState();
+      startTimer();
+      let currentQuestion = selectedQuestions[currentQuestionIndex];
+      questionElement.innerHTML = currentQuestion.question;
+
+      currentQuestion.answers.forEach(answer => {
+        const button = document.createElement("button");
+        button.innerHTML = answer.text;
+        button.classList.add("btn");
+        answerButtons.appendChild(button);
+        if (answer.correct) {
+          button.dataset.correct = answer.correct;
+        }
+        button.addEventListener("click", selectAnswer);
+      });
+    }
+
+    function resetState() {
+      clearInterval(timer);
+      timeLeft = 15;
+      timerElement.innerHTML = `Time Left: ${timeLeft}s`;
+      nextButton.style.display = "none";
+      while (answerButtons.firstChild) {
+        answerButtons.removeChild(answerButtons.firstChild);
+      }
+    }
+
+    function startTimer() {
+      timer = setInterval(() => {
+        timeLeft--;
+        timerElement.innerHTML = `Time Left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          handleNextButton(); // auto move
+        }
+      }, 1000);
+    }
+
+    function selectAnswer(e) {
+      clearInterval(timer);
+      const selectedBtn = e.target;
+      const isCorrect = selectedBtn.dataset.correct === "true";
+      if (isCorrect) {
+        selectedBtn.style.background = "#28a745";
+        score++;
+      } else {
+        selectedBtn.style.background = "#dc3545";
+      }
+      Array.from(answerButtons.children).forEach(button => {
+        if (button.dataset.correct === "true") {
+          button.style.background = "#28a745";
+        }
+        button.disabled = true;
+      });
+      nextButton.style.display = "block";
+    }
+
+    function showScore() {
+      resetState();
+      questionElement.innerHTML = `You scored ${score} out of ${selectedQuestions.length}!`;
+      timerElement.innerHTML = "";
+      nextButton.innerHTML = "Play Again";
+      nextButton.style.display = "block";
+    }
+
+    function handleNextButton() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < selectedQuestions.length) {
+        showQuestion();
+      } else {
+        showScore();
+      }
+    }
+
+    nextButton.addEventListener("click", () => {
+      if (currentQuestionIndex < selectedQuestions.length) {
+        handleNextButton();
+      } else {
+        startQuiz();
+        nextButton.innerHTML = "Next";
+      }
+    });
+
+    startQuiz();
+  </script>
+</body>
+</html>
